@@ -5,13 +5,19 @@ import java.util.Optional;
 import edu.hendrix.csci250.csci250proj4.User;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.DatePicker;
@@ -19,6 +25,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 
 public class PictoChatController {
 	@FXML
@@ -28,12 +35,16 @@ public class PictoChatController {
 	@FXML
 	private VBox chatroomContents;
 	@FXML
-	private Canvas drawingCanvas;
+	private Pane drawingCanvas;
 	
-	private GraphicsContext gc;
+	private double sx;
+	private double sy;
 
 	@FXML
 	private void initialize() {
+		drawingCanvas.setOnMousePressed(event -> startDrag(event));
+		drawingCanvas.setOnMouseDragged(event -> draw(event));
+		drawingCanvas.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 		Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle("Welcome to PictoChat");
 		alert.setHeaderText("Welcome to PictoChat");
@@ -84,5 +95,22 @@ public class PictoChatController {
 			Platform.exit();
 			System.exit(0);
 		}
+	}
+	
+	public void startDrag(MouseEvent event) {
+		sx = event.getX();
+		sy = event.getY();
+	}
+	
+	public void draw(MouseEvent event) {
+		double fx = event.getX();
+		double fy = event.getY();
+		Line line = new Line(sx, sy, fx, fy);
+		line.setStroke(Color.BLACK);
+		line.setStrokeLineCap(StrokeLineCap.ROUND);
+		line.setStrokeWidth(5);
+		drawingCanvas.getChildren().add(line);
+		sx = fx;
+		sy = fy;
 	}
 }

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.hendrix.csci250.csci250proj4.gui.PictoChatController">
@@ -24,7 +24,7 @@
                   <Insets bottom="10.0" top="10.0" />
                </VBox.margin>
             </Separator>
-            <Canvas fx:id="drawingCanvas" height="120.0" width="320.0" />
+            <Pane fx:id="drawingCanvas" maxHeight="120.0" maxWidth="320.0" prefHeight="120.0" prefWidth="320.0" />
          </children>
       </VBox>
    </center>
