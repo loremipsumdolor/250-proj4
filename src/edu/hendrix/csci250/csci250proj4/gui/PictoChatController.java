@@ -3,6 +3,7 @@ package edu.hendrix.csci250.csci250proj4.gui;
 import java.util.Optional;
 
 import edu.hendrix.csci250.csci250proj4.User;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -10,24 +11,29 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 
 public class PictoChatController {
 	@FXML
-	private ScrollPane chatroomContents;
+	private MenuItem exitChatroomMenuItem;
+	@FXML
+	private MenuItem quitMenuItem;
+	@FXML
+	private VBox chatroomContents;
 	@FXML
 	private Canvas drawingCanvas;
 	
 	private GraphicsContext gc;
 
-	public void initialize() {
-		gc = drawingCanvas.getGraphicsContext2D();
+	@FXML
+	private void initialize() {
 		Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle("Welcome to PictoChat");
 		alert.setHeaderText("Welcome to PictoChat");
@@ -74,6 +80,9 @@ public class PictoChatController {
 			if (userResult.isPresent()){
 			} else {
 			}
+		} else {
+			Platform.exit();
+			System.exit(0);
 		}
 	}
 }

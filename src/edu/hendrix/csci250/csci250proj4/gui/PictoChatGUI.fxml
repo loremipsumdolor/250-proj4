@@ -7,37 +7,16 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
-
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.60">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.hendrix.csci250.csci250proj4.gui.PictoChatController">
    <center>
       <VBox BorderPane.alignment="CENTER">
          <children>
-            <ScrollPane fx:id="chatroomContents" hbarPolicy="NEVER" prefHeight="240.0" prefWidth="320.0">
+            <ScrollPane hbarPolicy="NEVER" prefHeight="240.0" prefWidth="320.0">
                <content>
-                  <VBox prefHeight="200.0" prefWidth="100.0">
-                     <children>
-                        <ImageView fitHeight="120.0" fitWidth="320.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../../../../testimg.png" />
-                           </image>
-                        </ImageView>
-                        <ImageView fitHeight="120.0" fitWidth="320.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../../../../testimg2.png" />
-                           </image>
-                        </ImageView>
-                        <ImageView fitHeight="120.0" fitWidth="320.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../../../../testimg.png" />
-                           </image>
-                        </ImageView>
-                     </children>
-                  </VBox>
+                  <VBox fx:id="chatroomContents" prefHeight="200.0" prefWidth="100.0" />
                </content>
             </ScrollPane>
             <Separator prefWidth="200.0">
@@ -54,8 +33,8 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" text="Exit Chatroom" />
-                  <MenuItem mnemonicParsing="false" text="Quit" />
+              <MenuItem fx:id="exitChatroomMenuItem" mnemonicParsing="false" text="Exit Chatroom" />
+                  <MenuItem fx:id="quitMenuItem" mnemonicParsing="false" text="Quit" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
