@@ -2,10 +2,21 @@ package edu.hendrix.csci250.csci250proj4.gui;
 
 import java.util.Optional;
 
+import javax.imageio.ImageIO;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 import edu.hendrix.csci250.csci250proj4.User;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -18,6 +29,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.StrokeLineCap;
+import javafx.stage.Stage;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.DatePicker;
@@ -25,6 +37,9 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 
 public class PictoChatController {
@@ -37,12 +52,21 @@ public class PictoChatController {
 	@FXML
 	private Pane drawingCanvas;
 	
-	private double sx;
-	private double sy;
+	private ServerSocket serverSocket;
+	private Socket server;
 
 	@FXML
 	private void initialize() {
-		drawingCanvas.setOnMousePressed(event -> startDrag(event));
+		try {
+			serverSocket = new ServerSocket(8888);
+			serverSocket.setSoTimeout(180000);
+		} catch (IOException e) {
+			e.printStackTrace();
+			outputMessage(AlertType.ERROR, e.getMessage());
+			Platform.exit();
+			System.exit(0);
+		}
+		drawingCanvas.setOnMousePressed(event -> draw(event));
 		drawingCanvas.setOnMouseDragged(event -> draw(event));
 		drawingCanvas.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 		Alert alert = new Alert(AlertType.CONFIRMATION);
@@ -63,7 +87,6 @@ public class PictoChatController {
 		} else if (result.get() == buttonTypeD) {
 		} else if (result.get() == buttonTypeSettings) {
 			Dialog<User> dialog = new Dialog<>();
-			dialog.initOwner(drawingCanvas.getScene().getWindow());
 			dialog.setTitle("Settings");
 			dialog.setHeaderText("PictoChat Settings");
 			ButtonType buttonTypeSave = new ButtonType("Save", ButtonData.OK_DONE);
@@ -95,31 +118,30 @@ public class PictoChatController {
 			Platform.exit();
 			System.exit(0);
 		}
+		afterInitialize();
 	}
 	
-	public void startDrag(MouseEvent event) {
-		sx = event.getX();
-		sy = event.getY();
+	private void afterInitialize() {
+		((Node)drawingCanvas.getScene()).setOnKeyPressed(event -> {if(event.getCode().equals(KeyCode.ENTER)){sendMessage();}});
 	}
 	
 	public void draw(MouseEvent event) {
+		double sx = event.getX();
+		double sy = event.getY();
 		double fx = event.getX();
 		double fy = event.getY();
 		double canvasWidth = drawingCanvas.getWidth();
 		double canvasHeight = drawingCanvas.getHeight();
-		
 		if (fx < 0) {
 			fx = 0;
 		} else if (fx > canvasWidth) {
 			fx = canvasWidth;
 		}
-		
 		if (fy < 0) {
 			fy = 0;
 		} else if (fy > canvasHeight) {
 			fy = canvasHeight;
 		}
-		
 		Line line = new Line(sx, sy, fx, fy);
 		line.setStroke(Color.BLACK);
 		line.setStrokeLineCap(StrokeLineCap.ROUND);
@@ -127,6 +149,34 @@ public class PictoChatController {
 		drawingCanvas.getChildren().add(line);
 		sx = fx;
 		sy = fy;
+	}
+	
+	public void sendMessage() {
+		Socket client;
+		try {
+			client = new Socket("localhost", 8888);
+			WritableImage savedPane = drawingCanvas.snapshot(new SnapshotParameters(), null);
+			ImageIO.write(SwingFXUtils.fromFXImage(savedPane, null), "jpg", client.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+			outputMessage(AlertType.ERROR, e.getMessage());
+		}
+	}
+	
+	Task<Void> receiveMessage = new Task<Void>() {
+        @Override
+        protected Void call() throws Exception {
+            server = serverSocket.accept();
+			BufferedImage img = ImageIO.read(ImageIO.createImageInputStream(server.getInputStream()));
+			chatroomContents.getChildren().add(new ImageView(SwingFXUtils.toFXImage(img, null)));
+            return null;
+        }
+    };
+	
+	private void outputMessage(AlertType alertType, String message) {
+		Alert alert = new Alert(alertType, message);
+		alert.initOwner(drawingCanvas.getScene().getWindow());
+		alert.showAndWait();
 	}
 	
 }
