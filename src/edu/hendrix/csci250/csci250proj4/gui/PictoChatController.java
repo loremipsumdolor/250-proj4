@@ -105,6 +105,21 @@ public class PictoChatController {
 	public void draw(MouseEvent event) {
 		double fx = event.getX();
 		double fy = event.getY();
+		double canvasWidth = drawingCanvas.getWidth();
+		double canvasHeight = drawingCanvas.getHeight();
+		
+		if (fx < 0) {
+			fx = 0;
+		} else if (fx > canvasWidth) {
+			fx = canvasWidth;
+		}
+		
+		if (fy < 0) {
+			fy = 0;
+		} else if (fy > canvasHeight) {
+			fy = canvasHeight;
+		}
+		
 		Line line = new Line(sx, sy, fx, fy);
 		line.setStroke(Color.BLACK);
 		line.setStrokeLineCap(StrokeLineCap.ROUND);
@@ -113,4 +128,5 @@ public class PictoChatController {
 		sx = fx;
 		sy = fy;
 	}
+	
 }
