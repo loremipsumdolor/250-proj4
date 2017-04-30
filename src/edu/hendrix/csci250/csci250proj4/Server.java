@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.util.HashSet;
 
 public class Server {
-    private static HashSet<String> names = new HashSet<String>();
     private static HashSet<ObjectOutputStream> streams = new HashSet<ObjectOutputStream>();
 
     public static void main(String[] args) throws Exception {
@@ -22,7 +21,6 @@ public class Server {
     }
 
     private static class Handler extends Thread {
-        private String name;
         private Socket socket;
         private ObjectInputStream in;
         private ObjectOutputStream out;
@@ -33,23 +31,23 @@ public class Server {
 
         public void run() {
             try {
+            	System.out.println("CONNECT");
+            	out = new ObjectOutputStream(socket.getOutputStream());
                 in = new ObjectInputStream(socket.getInputStream());
-                out = new ObjectOutputStream(socket.getOutputStream());
+                streams.add(out);
                 while (true) {
                     Object input = in.readObject();
                     if (input == null) {
                         return;
                     }
                     for (ObjectOutputStream stream : streams) {
+                    	System.out.println("OBJECT");
                     	stream.writeObject(input);
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                if (name != null) {
-                    names.remove(name);
-                }
                 if (out != null) {
                     streams.remove(out);
                 }

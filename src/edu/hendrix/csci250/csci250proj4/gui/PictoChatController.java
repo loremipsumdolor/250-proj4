@@ -206,9 +206,12 @@ public class PictoChatController {
         @Override
         protected Void call() throws Exception {
         	while (true) {
-        		WritableImage img = SwingFXUtils.toFXImage((BufferedImage)((ImageIcon)in.readObject()).getImage(), null);
-                chatroomContents.getChildren().add(new ImageView(img));
-            }
+                Object input = in.readObject();
+                if (input == null) {} else {
+                	WritableImage img = SwingFXUtils.toFXImage((BufferedImage)((ImageIcon)in.readObject()).getImage(), null);
+                    chatroomContents.getChildren().add(new ImageView(img));
+                }
+        	}
         }
     };
 	
