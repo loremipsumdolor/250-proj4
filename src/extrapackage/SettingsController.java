@@ -40,7 +40,7 @@ public class SettingsController {
 	public void saveClicked() {
 		if (name.getText() != "" && birthday.getValue() != null) {
 			currentUser = new User(name.getText(), birthday.getValue(), color.getValue());
-			openChatroomSelectScene(currentUser);
+			openChatroomSelectScene();
 			cancelClicked();
 		} else {
 			Alert alert = new Alert(AlertType.ERROR);
@@ -52,7 +52,7 @@ public class SettingsController {
 	}
 	
 	@FXML
-	public void openChatroomSelectScene(User currentUser) {
+	public void openChatroomSelectScene() {
 		try { 
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(this.getClass().getResource("ChatroomSelectGUI.fxml"));
@@ -60,6 +60,7 @@ public class SettingsController {
 			
 			ChatroomSelectController CSController = (ChatroomSelectController) loader.getController();
 			CSController.getUserFromSettings(currentUser);
+			System.out.println(currentUser.getFavoriteColor());
 			
 			Stage secondStage = new Stage();
 			Scene scene = new Scene(root);
@@ -77,6 +78,7 @@ public class SettingsController {
 			alert.setTitle("Cannot Open Chatroom Select Window");
 			alert.setHeaderText("Oops, something has gone wrong!");
 			alert.showAndWait();
+			e.printStackTrace();
 		}
 		
 	}

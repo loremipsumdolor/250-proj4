@@ -38,10 +38,10 @@
       <Label fx:id="roomBSize" layoutX="120.0" layoutY="147.0" text="0 people" />
       <Label fx:id="roomDSize" layoutX="349.0" layoutY="147.0" text="0 people" />
       <Label fx:id="roomCSize" layoutX="349.0" layoutY="115.0" text="0 people" />
-      <Button fx:id="selectRoomA" layoutX="13.0" layoutY="188.0" mnemonicParsing="false" text="Chatroom A" />
+      <Button fx:id="selectRoomA" layoutX="13.0" layoutY="188.0" mnemonicParsing="false" onAction="#openCanvasScene" text="Chatroom A" />
       <Button fx:id="selectRoomB" layoutX="120.0" layoutY="188.0" mnemonicParsing="false" text="Chatroom B" />
       <Button fx:id="selectRoomC" layoutX="228.0" layoutY="188.0" mnemonicParsing="false" text="Chatroom C" />
       <Button fx:id="selectRoomD" layoutX="337.0" layoutY="188.0" mnemonicParsing="false" text="Chatroom D" />
-      <Button layoutX="378.0" layoutY="11.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="58.0" text="Quit" />
+      <Button fx:id="quit" layoutX="378.0" layoutY="11.0" mnemonicParsing="false" onAction="#quitClicked" prefHeight="31.0" prefWidth="58.0" text="Quit" />
    </children>
 </Pane>
