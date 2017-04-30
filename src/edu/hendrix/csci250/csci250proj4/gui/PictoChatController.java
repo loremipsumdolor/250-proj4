@@ -6,10 +6,14 @@ import javax.imageio.ImageIO;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import edu.hendrix.csci250.csci250proj4.Server;
 import edu.hendrix.csci250.csci250proj4.User;
+import edu.hendrix.csci250.csci250proj4.Server.Handler;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
@@ -37,6 +41,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
@@ -56,23 +61,17 @@ public class PictoChatController {
 	private Button sendButton;
 	@FXML
 	private ColorPicker chatColor;
-	
-	private ServerSocket serverSocket;
-	private Socket server;
+
 	private User user;
 	private double sx;
 	private double sy;
+	
+	private Socket socket;
+	private ObjectInputStream in;
+    private ObjectOutputStream out;
 
 	@FXML
 	private void initialize() {
-		try {
-			serverSocket = new ServerSocket(8888);
-			serverSocket.setSoTimeout(180000);
-		} catch (IOException e) {
-			e.printStackTrace();
-			outputMessage(AlertType.ERROR, e.getMessage());
-			
-		}
 		chatColor.setValue(Color.BLACK);
 		drawingCanvas.setOnMousePressed(event -> startDrag(event));
 		drawingCanvas.setOnMouseDragged(event -> draw(event));
@@ -108,26 +107,69 @@ public class PictoChatController {
 			Platform.exit();
 			System.exit(0);
 		}
-		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setTitle("Welcome to PictoChat");
-		alert.setHeaderText("Welcome to PictoChat");
-		alert.setContentText("Select a chatroom:\n\nA: 0/15\nB: 0/15\nC: 0/15\nD: 0/15\n");
-		ButtonType buttonTypeA = new ButtonType("A");
-		ButtonType buttonTypeB = new ButtonType("B");
-		ButtonType buttonTypeC = new ButtonType("C");
-		ButtonType buttonTypeD = new ButtonType("D");
-		ButtonType buttonTypeCancel = new ButtonType("Quit", ButtonData.CANCEL_CLOSE);
-		alert.getButtonTypes().setAll(buttonTypeA, buttonTypeB, buttonTypeC, buttonTypeD, buttonTypeCancel);
-		Optional<ButtonType> result = alert.showAndWait();
-		if (result.get() == buttonTypeA){
-		} else if (result.get() == buttonTypeB) {
-		} else if (result.get() == buttonTypeC) {
-		} else if (result.get() == buttonTypeD) {
+		Alert clientServerDialog = new Alert(AlertType.CONFIRMATION);
+		clientServerDialog.setTitle("Client/Server Selection");
+		clientServerDialog.setHeaderText("Client/Server Selection");
+		clientServerDialog.setContentText("Choose your option.");
+		ButtonType buttonTypeServer = new ButtonType("Server");
+		ButtonType buttonTypeClient = new ButtonType("Client");
+		ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+		clientServerDialog.getButtonTypes().setAll(buttonTypeServer, buttonTypeClient, buttonTypeCancel);
+		Optional<ButtonType> buttonClicked = clientServerDialog.showAndWait();
+		if (buttonClicked.get() == buttonTypeServer) {
+			try {
+				ServerSocket listener = new ServerSocket(8888);
+		        Thread thread = new Thread(new Runnable() {
+		            @Override
+		            public void run() {
+		                try {
+		                    while (true) {
+		                        try {
+									new Server.Handler(listener.accept()).start();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+		                    }
+		                } finally {
+		                    try {
+								listener.close();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+		                }
+		            }
+		        });
+		        thread.start();
+			} catch (Exception e) {
+				e.printStackTrace();
+				Platform.exit();
+				System.exit(0);
+			}
+		} else if (buttonClicked.get() == buttonTypeClient) {
+			TextInputDialog ipDialog = new TextInputDialog();
+			ipDialog.setTitle("Enter IP Address");
+			ipDialog.setHeaderText("Enter IP Address");
+			ipDialog.setContentText("Please enter the IP of the server:");
+			Optional<String> ipResult = ipDialog.showAndWait();
+			if (ipResult.isPresent()) {
+				try {
+					socket = new Socket(ipResult.get(), 8888);
+					in = new ObjectInputStream(socket.getInputStream());
+					out = new ObjectOutputStream(socket.getOutputStream());
+				} catch (Exception e) {
+					e.printStackTrace();
+					outputMessage(AlertType.ERROR, e.getMessage());
+					Platform.exit();
+				    System.exit(0);
+				}
+			} else {
+				Platform.exit();
+			    System.exit(0);
+			}
 		} else {
-			Platform.exit();
-			System.exit(0);
+		    Platform.exit();
+		    System.exit(0);
 		}
-		new Thread(receiveMessage).start();
 	}
 	
 	public void startDrag(MouseEvent event) {
@@ -160,14 +202,30 @@ public class PictoChatController {
 	}
 	
 	public void sendMessage() {
+		Line line = new Line(0, 0, 0, 120);
+		line.setStroke(user.getFavoriteColor());
+		line.setStrokeWidth(5);
+		drawingCanvas.getChildren().add(line);
+		line = new Line(0, 0, 320, 0);
+		line.setStroke(user.getFavoriteColor());
+		line.setStrokeWidth(5);
+		drawingCanvas.getChildren().add(line);
+		line = new Line(0, 120, 320, 120);
+		line.setStroke(user.getFavoriteColor());
+		line.setStrokeWidth(5);
+		drawingCanvas.getChildren().add(line);
+		line = new Line(320, 0, 320, 120);
+		line.setStroke(user.getFavoriteColor());
+		line.setStrokeWidth(5);
+		drawingCanvas.getChildren().add(line);
 		WritableImage savedPane = drawingCanvas.snapshot(new SnapshotParameters(), null);
 		chatroomContents.getChildren().add(new ImageView(savedPane));
 		drawingCanvas.getChildren().clear();
 		chatroomScrollPane.setVvalue(chatroomScrollPane.getVmax());
-		Socket client;
 		try {
-			client = new Socket("localhost", 8888);
-			ImageIO.write(SwingFXUtils.fromFXImage(savedPane, null), "jpg", client.getOutputStream());
+			out.flush();
+			out.writeObject(savedPane);
+			//ImageIO.write(SwingFXUtils.fromFXImage(savedPane, null), "jpg", out);
 		} catch (IOException e) {
 			e.printStackTrace();
 			outputMessage(AlertType.ERROR, e.getMessage());
@@ -177,11 +235,10 @@ public class PictoChatController {
 	Task<Void> receiveMessage = new Task<Void>() {
         @Override
         protected Void call() throws Exception {
-        	while(true) {
-	            server = serverSocket.accept();
-				BufferedImage img = ImageIO.read(ImageIO.createImageInputStream(server.getInputStream()));
-				chatroomContents.getChildren().add(new ImageView(SwingFXUtils.toFXImage(img, null)));
-        	}
+        	while (true) {
+        		BufferedImage img = ImageIO.read(in);
+                chatroomContents.getChildren().add(new ImageView(SwingFXUtils.toFXImage(img, null)));
+            }
         }
     };
 	
