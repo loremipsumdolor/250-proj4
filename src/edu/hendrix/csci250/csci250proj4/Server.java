@@ -43,6 +43,7 @@ public class Server {
                     for (ObjectOutputStream stream : streams) {
                     	System.out.println("OBJECT");
                     	stream.writeObject(input);
+                    	stream.flush();
                     }
                 }
             } catch (Exception e) {

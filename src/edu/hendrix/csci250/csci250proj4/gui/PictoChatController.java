@@ -39,6 +39,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
@@ -208,12 +209,23 @@ public class PictoChatController {
         	while (true) {
                 Object input = in.readObject();
                 if (input == null) {} else {
-                	WritableImage img = SwingFXUtils.toFXImage((BufferedImage)((ImageIcon)in.readObject()).getImage(), null);
-                    chatroomContents.getChildren().add(new ImageView(img));
+                	java.awt.Image imgIcon = ((ImageIcon)input).getImage();
+                	System.out.println("Y");
+                	WritableImage img = SwingFXUtils.toFXImage((BufferedImage)(imgIcon), null);
+                    addImage(img);
                 }
         	}
         }
     };
+    
+    public void addImage(WritableImage img) {
+    	Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				chatroomContents.getChildren().add(new ImageView(img));
+			}
+    	});
+    }
 	
 	private void outputMessage(AlertType alertType, String message) {
 		Alert alert = new Alert(alertType, message);
