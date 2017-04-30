@@ -2,7 +2,6 @@ package edu.hendrix.csci250.csci250proj4.gui;
 
 import java.util.Optional;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 import java.awt.image.BufferedImage;
@@ -141,6 +140,7 @@ public class PictoChatController {
 		    Platform.exit();
 		    System.exit(0);
 		}
+		new Thread(receiveMessage).start();
 	}
 	
 	public void startDrag(MouseEvent event) {
@@ -206,8 +206,8 @@ public class PictoChatController {
         @Override
         protected Void call() throws Exception {
         	while (true) {
-        		BufferedImage img = ImageIO.read(in);
-                chatroomContents.getChildren().add(new ImageView(SwingFXUtils.toFXImage(img, null)));
+        		WritableImage img = SwingFXUtils.toFXImage((BufferedImage)((ImageIcon)in.readObject()).getImage(), null);
+                chatroomContents.getChildren().add(new ImageView(img));
             }
         }
     };
