@@ -209,10 +209,14 @@ public class PictoChatController {
         	while (true) {
                 Object input = in.readObject();
                 if (input == null) {} else {
-                	java.awt.Image imgIcon = ((ImageIcon)input).getImage();
-                	System.out.println("Y");
-                	WritableImage img = SwingFXUtils.toFXImage((BufferedImage)(imgIcon), null);
-                    addImage(img);
+                	ImageIcon imgIcon = (ImageIcon)input;
+                	System.out.println("GOOD");
+                	java.awt.Image img = imgIcon.getImage();
+                	System.out.println("Yes");
+                	WritableImage img2 = SwingFXUtils.toFXImage((BufferedImage)img, null);
+                	System.out.println("Works");
+                	addImage(img2);
+                	System.out.println("DONE");
                 }
         	}
         }
