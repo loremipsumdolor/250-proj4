@@ -3,17 +3,15 @@ package edu.hendrix.csci250.csci250proj4.gui;
 import java.util.Optional;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 
-import edu.hendrix.csci250.csci250proj4.Server;
 import edu.hendrix.csci250.csci250proj4.User;
-import edu.hendrix.csci250.csci250proj4.Server.Handler;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
@@ -117,34 +115,6 @@ public class PictoChatController {
 		clientServerDialog.getButtonTypes().setAll(buttonTypeServer, buttonTypeClient, buttonTypeCancel);
 		Optional<ButtonType> buttonClicked = clientServerDialog.showAndWait();
 		if (buttonClicked.get() == buttonTypeServer) {
-			try {
-				ServerSocket listener = new ServerSocket(8888);
-		        Thread thread = new Thread(new Runnable() {
-		            @Override
-		            public void run() {
-		                try {
-		                    while (true) {
-		                        try {
-									new Server.Handler(listener.accept()).start();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
-		                    }
-		                } finally {
-		                    try {
-								listener.close();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-		                }
-		            }
-		        });
-		        thread.start();
-			} catch (Exception e) {
-				e.printStackTrace();
-				Platform.exit();
-				System.exit(0);
-			}
 		} else if (buttonClicked.get() == buttonTypeClient) {
 			TextInputDialog ipDialog = new TextInputDialog();
 			ipDialog.setTitle("Enter IP Address");
@@ -154,8 +124,9 @@ public class PictoChatController {
 			if (ipResult.isPresent()) {
 				try {
 					socket = new Socket(ipResult.get(), 8888);
-					in = new ObjectInputStream(socket.getInputStream());
 					out = new ObjectOutputStream(socket.getOutputStream());
+					out.flush();
+					in = new ObjectInputStream(socket.getInputStream());
 				} catch (Exception e) {
 					e.printStackTrace();
 					outputMessage(AlertType.ERROR, e.getMessage());
@@ -224,8 +195,7 @@ public class PictoChatController {
 		chatroomScrollPane.setVvalue(chatroomScrollPane.getVmax());
 		try {
 			out.flush();
-			out.writeObject(savedPane);
-			//ImageIO.write(SwingFXUtils.fromFXImage(savedPane, null), "jpg", out);
+			out.writeObject(new ImageIcon(SwingFXUtils.fromFXImage(savedPane, null)));
 		} catch (IOException e) {
 			e.printStackTrace();
 			outputMessage(AlertType.ERROR, e.getMessage());

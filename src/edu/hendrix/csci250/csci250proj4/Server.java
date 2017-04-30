@@ -2,6 +2,7 @@ package edu.hendrix.csci250.csci250proj4;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 
@@ -9,7 +10,18 @@ public class Server {
     private static HashSet<String> names = new HashSet<String>();
     private static HashSet<ObjectOutputStream> streams = new HashSet<ObjectOutputStream>();
 
-    public static class Handler extends Thread {
+    public static void main(String[] args) throws Exception {
+        ServerSocket listener = new ServerSocket(8888);
+        try {
+            while (true) {
+                new Handler(listener.accept()).start();
+            }
+        } finally {
+            listener.close();
+        }
+    }
+
+    private static class Handler extends Thread {
         private String name;
         private Socket socket;
         private ObjectInputStream in;
