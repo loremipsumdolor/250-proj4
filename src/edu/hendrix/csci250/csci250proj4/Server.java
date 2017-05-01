@@ -6,6 +6,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 
+//THANK YOU TO http://cs.lmu.edu/~ray/notes/javanetexamples/#chat
+
 public class Server {
     private static HashSet<ObjectOutputStream> streams = new HashSet<ObjectOutputStream>();
 
@@ -29,8 +31,10 @@ public class Server {
             this.socket = socket;
         }
 
+        @Override
         public void run() {
             try {
+            	System.out.println("CONNECT " + socket.getInetAddress().getHostAddress());
             	out = new ObjectOutputStream(socket.getOutputStream());
                 in = new ObjectInputStream(socket.getInputStream());
                 streams.add(out);

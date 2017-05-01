@@ -1,16 +1,16 @@
 package edu.hendrix.csci250.csci250proj4.gui;
 
-import java.util.Optional;
-
-import javax.swing.ImageIcon;
-
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Optional;
 
+import javax.swing.ImageIcon;
+
+import edu.hendrix.csci250.csci250proj4.Server;
 import edu.hendrix.csci250.csci250proj4.User;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -30,6 +30,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
@@ -46,9 +47,9 @@ import javafx.scene.input.MouseEvent;
 
 public class PictoChatController {
 	@FXML
-	private MenuItem exitChatroomMenuItem;
+	private MenuItem exitMenuItem;
 	@FXML
-	private MenuItem quitMenuItem;
+	private MenuItem aboutMenuItem;
 	@FXML
 	private ScrollPane chatroomScrollPane;
 	@FXML
@@ -115,6 +116,26 @@ public class PictoChatController {
 		clientServerDialog.getButtonTypes().setAll(buttonTypeServer, buttonTypeClient, buttonTypeCancel);
 		Optional<ButtonType> buttonClicked = clientServerDialog.showAndWait();
 		if (buttonClicked.get() == buttonTypeServer) {
+			Task<Void> server = new Task<Void>() {
+		        @Override
+		        protected Void call() throws Exception {
+		        	while(true) {
+			        	Server.main(null);
+		        	}
+		        }
+			};
+			new Thread(server).start();
+			try {
+				socket = new Socket("0.0.0.0", 8888);
+				out = new ObjectOutputStream(socket.getOutputStream());
+				out.flush();
+				in = new ObjectInputStream(socket.getInputStream());
+			} catch (Exception e) {
+				e.printStackTrace();
+				outputMessage(AlertType.ERROR, e.getMessage());
+				Platform.exit();
+			    System.exit(0);
+			}
 		} else if (buttonClicked.get() == buttonTypeClient) {
 			TextInputDialog ipDialog = new TextInputDialog();
 			ipDialog.setTitle("Enter IP Address");
@@ -141,6 +162,10 @@ public class PictoChatController {
 		    Platform.exit();
 		    System.exit(0);
 		}
+		exitMenuItem.setOnAction(event -> {
+			Platform.exit();
+			System.exit(0);
+		});
 		new Thread(receiveMessage).start();
 	}
 	
@@ -174,28 +199,17 @@ public class PictoChatController {
 	}
 	
 	public void sendMessage() {
-		Line line = new Line(0, 0, 0, 120);
-		line.setStroke(user.getFavoriteColor());
-		line.setStrokeWidth(5);
-		drawingCanvas.getChildren().add(line);
-		line = new Line(0, 0, 320, 0);
-		line.setStroke(user.getFavoriteColor());
-		line.setStrokeWidth(5);
-		drawingCanvas.getChildren().add(line);
-		line = new Line(0, 120, 320, 120);
-		line.setStroke(user.getFavoriteColor());
-		line.setStrokeWidth(5);
-		drawingCanvas.getChildren().add(line);
-		line = new Line(320, 0, 320, 120);
-		line.setStroke(user.getFavoriteColor());
-		line.setStrokeWidth(5);
-		drawingCanvas.getChildren().add(line);
+		Rectangle rec = new Rectangle(0, 0, drawingCanvas.getWidth(), drawingCanvas.getHeight());
+		rec.setStroke(user.getFavoriteColor());
+		rec.setFill(Color.TRANSPARENT);
+		rec.setStrokeWidth(5);
+		drawingCanvas.getChildren().add(rec);
 		WritableImage savedPane = drawingCanvas.snapshot(new SnapshotParameters(), null);
 		drawingCanvas.getChildren().clear();
 		chatroomScrollPane.setVvalue(chatroomScrollPane.getVmax());
 		try {
-			out.flush();
 			out.writeObject(new ImageIcon(SwingFXUtils.fromFXImage(savedPane, null)));
+			out.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 			outputMessage(AlertType.ERROR, e.getMessage());
@@ -209,14 +223,14 @@ public class PictoChatController {
                 Object input = in.readObject();
                 if (input == null) {} else {
                 	try {
-                	ImageIcon imgIcon = (ImageIcon)input;
-                	java.awt.Image img = imgIcon.getImage();
-                	BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-                    Graphics2D bGr = bimage.createGraphics();
-                    bGr.drawImage(img, 0, 0, null);
-                    bGr.dispose();
-                    WritableImage img2 = SwingFXUtils.toFXImage(bimage, null);
-                	addImage(img2);
+	                	ImageIcon imgIcon = (ImageIcon)input;
+	                	java.awt.Image img = imgIcon.getImage();
+	                	BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+	                    Graphics2D bGr = bimage.createGraphics();
+	                    bGr.drawImage(img, 0, 0, null);
+	                    bGr.dispose();
+	                    WritableImage img2 = SwingFXUtils.toFXImage(bimage, null);
+	                	addImage(img2);
                 	} catch (Exception e) {
                 		e.printStackTrace();
                 	}
@@ -233,6 +247,16 @@ public class PictoChatController {
 			}
     	});
     }
+    
+	@FXML
+	private void aboutDialog() {
+		Alert aboutBox = new Alert(AlertType.INFORMATION);
+		aboutBox.initOwner(chatroomContents.getScene().getWindow());
+		aboutBox.setTitle("About PictoChat");
+		aboutBox.setHeaderText("About PictoChat");
+		aboutBox.setContentText("PictoChat v1.0\nCreated for Dr. Ferrer's CSCI 250 Spring 2017 class\n\nProject members:\n* Jacob Turner\n* Jonathan Kwee\n* Uzair Tariq");
+		aboutBox.showAndWait();
+	}
 	
 	private void outputMessage(AlertType alertType, String message) {
 		Alert alert = new Alert(alertType, message);

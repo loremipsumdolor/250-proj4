@@ -19,7 +19,7 @@
          <children>
             <ScrollPane fx:id="chatroomScrollPane" hbarPolicy="NEVER" prefHeight="240.0" prefWidth="320.0" vvalue="1.0">
                <content>
-                  <VBox fx:id="chatroomContents" prefHeight="200.0" prefWidth="100.0" />
+                  <VBox fx:id="chatroomContents" />
                </content>
             </ScrollPane>
             <Separator prefWidth="200.0">
@@ -42,13 +42,12 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem fx:id="exitChatroomMenuItem" mnemonicParsing="false" text="Exit Chatroom" />
-                  <MenuItem fx:id="quitMenuItem" mnemonicParsing="false" text="Quit" />
+              <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" text="Exit" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
-              <MenuItem mnemonicParsing="false" text="About" />
+              <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" onAction="#aboutDialog" text="About" />
             </items>
           </Menu>
         </menus>
