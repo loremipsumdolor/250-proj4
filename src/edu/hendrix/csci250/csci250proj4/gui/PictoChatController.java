@@ -40,7 +40,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
@@ -192,7 +191,6 @@ public class PictoChatController {
 		line.setStrokeWidth(5);
 		drawingCanvas.getChildren().add(line);
 		WritableImage savedPane = drawingCanvas.snapshot(new SnapshotParameters(), null);
-		//chatroomContents.getChildren().add(new ImageView(savedPane));
 		drawingCanvas.getChildren().clear();
 		chatroomScrollPane.setVvalue(chatroomScrollPane.getVmax());
 		try {
@@ -212,17 +210,13 @@ public class PictoChatController {
                 if (input == null) {} else {
                 	try {
                 	ImageIcon imgIcon = (ImageIcon)input;
-                	System.out.println("GOOD");
                 	java.awt.Image img = imgIcon.getImage();
-                	System.out.println("Yes");
                 	BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
                     Graphics2D bGr = bimage.createGraphics();
                     bGr.drawImage(img, 0, 0, null);
                     bGr.dispose();
                     WritableImage img2 = SwingFXUtils.toFXImage(bimage, null);
-                	System.out.println("Works");
                 	addImage(img2);
-                	System.out.println("DONE");
                 	} catch (Exception e) {
                 		e.printStackTrace();
                 	}
@@ -230,7 +224,7 @@ public class PictoChatController {
         	}
         }
     };
-    //10.253.201.94
+
     public void addImage(WritableImage img) {
     	Platform.runLater(new Runnable() {
 			@Override

@@ -31,7 +31,6 @@ public class Server {
 
         public void run() {
             try {
-            	System.out.println("CONNECT");
             	out = new ObjectOutputStream(socket.getOutputStream());
                 in = new ObjectInputStream(socket.getInputStream());
                 streams.add(out);
@@ -41,7 +40,6 @@ public class Server {
                         return;
                     }
                     for (ObjectOutputStream stream : streams) {
-                    	System.out.println("OBJECT");
                     	stream.writeObject(input);
                     	stream.flush();
                     }
